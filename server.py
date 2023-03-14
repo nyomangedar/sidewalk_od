@@ -6,6 +6,9 @@ from boundingbox_processing import BoundingBoxProcessing
 
 app = FastAPI()
 
+@app.get("test")
+def test():
+    return "Hello World"
 
 @app.get("/darknet")
 def darknetTest():

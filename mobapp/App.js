@@ -12,6 +12,7 @@ import { useState, useEffect, useRef } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as Speech from "expo-speech";
 import * as FileSystem from "expo-file-system"
+import { useInterval } from "usehooks-ts";
 // import { setIntervalAsync, clearIntervalAsync } from "set-interval-async";
 
 export default function App() {
@@ -35,7 +36,6 @@ export default function App() {
               fieldName: 'file',
               mimeType: 'image/png',
             });
-        console.log("didalem request",{waiting})
         return res.body
 
     }
@@ -45,6 +45,9 @@ export default function App() {
     };
 
     const speak = (data) => {
+        if (data === 'none'){
+            return
+        }
         Speech.speak(data, {
             pitch: 1,
         });
@@ -53,15 +56,12 @@ export default function App() {
     const beginCapture = async () => {
         if(capture){
             speak("Stop Capturing Image")
+            setData("")
         }
         else{
             speak("Begin Capturing Image")
         }
         setCapture(!capture)
-        // const image = await takePicture()
-        // const test =  await request(image.uri, test)
-        // console.log(test)
-       
     }
 
     const captureFunction = async () => {
@@ -71,8 +71,9 @@ export default function App() {
             console.log({waiting})
             const data = await request(image.uri)
             if(data){
-                console.log(data)
-                speak(data)
+                if(data !== "\"none\""){
+                    speak(data)
+                }
                 setData(data)
                 setWaiting(false)
             }
@@ -80,23 +81,10 @@ export default function App() {
         }
     };
 
-    const loopFunction = async () => {
-       loop = setInterval(async () => {
-            // console.log(capture);
-            await captureFunction();
-            console.log("finish one request");
-        }, 5000);
-        if (capture === false) {
-            clearInterval(loop);
-        }
-    };
-    useEffect(() => {
-        loopFunction();
-        return () => {
-            clearInterval(loop);
-            setData("")
-        };
-    }, [capture]);
+    useInterval(()=>{
+        captureFunction()
+
+    }, capture? 5000 : null)
 
     useEffect(() => {
         setupCamera();
@@ -108,7 +96,6 @@ export default function App() {
             try {
                 console.log("start test");
                 setWaiting(true)
-                console.log("waiting di picture", waiting)
                 const image = await cameraRef.current.takePictureAsync();
                 return image
             } catch (error) {
@@ -122,7 +109,10 @@ export default function App() {
     const message = () => {
         if (data.length !== 0) {
             return data;
-        } else {
+        } else if (data === "\"none\""){
+            return "Path is clear";
+        } 
+        else {
             return "Loading...";
         }
     };
