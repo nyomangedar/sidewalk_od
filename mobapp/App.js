@@ -7,11 +7,11 @@ import {
     TouchableOpacity,
     Dimensions,
 } from "react-native";
+import CheckBox from "expo-checkbox";
 import { Camera, CameraType } from "expo-camera";
 import { useState, useEffect, useRef } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as Speech from "expo-speech";
-import * as FileSystem from "expo-file-system"
 import { useInterval } from "usehooks-ts";
 // import { setIntervalAsync, clearIntervalAsync } from "set-interval-async";
 
@@ -24,19 +24,28 @@ export default function App() {
     const [capture, setCapture] = useState(false);
     const cameraRef = useRef(null);
     const { height, width } = Dimensions.get("window");
+    const [options, setOptions] = useState(null)
+    const [settingTrigger, setSettingTrigger] = useState(false)
     let loop;
 
 
     const request = async (file) => {
-        const res = await FileSystem.uploadAsync(
-            "http://192.168.0.21:8000/uploadfile",
-            file,
-            {
-              uploadType: FileSystem.FileSystemUploadType.MULTIPART,
-              fieldName: 'file',
-              mimeType: 'image/png',
-            });
-        return res.body
+        let res
+        const photo = {
+            name: "test.jpg",
+            uri: file,
+            type: 'image/png',
+        }
+        const form = new FormData()
+        form.append('file', photo)
+        await fetch("http://192.168.0.21:8000/uploadfile", {
+            method:'POST',
+            body: form,
+            headers:{
+                'Content-Type':"multipart/form-data"
+            }
+        }).then((res) => res.json()).then((resData) => {res = resData})
+        return res
 
     }
     const setupCamera = async () => {
@@ -122,26 +131,42 @@ export default function App() {
     }
     return (
         <View style={styles.container}>
-            <Camera
-                style={[
-                    styles.camera,
-                    {
-                        marginBottom: height - (4 / 3) * width,
-                    },
-                ]}
-                type={type}
-                ratio={"4:3"}
-                ref={cameraRef}
-            ></Camera>
+            {!settingTrigger ? (
+                <Camera
+                    style={[
+                        styles.camera,
+                        {
+                            marginBottom: height - (4 / 3) * width,
+                        },
+                    ]}
+                    type={type}
+                    ratio={"4:3"}
+                    ref={cameraRef}
+                >
+                    <View style={styles.topButtonContainer}>
+                    <TouchableOpacity style={styles.settingButton} onPress={()=> setSettingTrigger(true)}>
+                        <Text style={{color:"#fff"}}>Settings</Text>
+                    </TouchableOpacity>
+                    </View>
+                    {/* <Button title="Settings"/> */}
+                    
+                </Camera>
+            ) : (
+                <View style={styles.settingContainer}>
+                    <CheckBox />
+                    <Text>INI SETTING</Text>
+                </View>
+                
+            )}
+            
             <View style={styles.buttonContainer}>
+            
                 <Text>{capture && message()}</Text>
                 <Button
                     title="begin capture"
                     onPress={() => beginCapture()}
                     // onPress={speak}
-                >
-                    Begin
-                </Button>
+                 />
             </View>
         </View>
     );
@@ -159,4 +184,15 @@ const styles = StyleSheet.create({
     buttonContainer: {
         flex: 1,
     },
+    topButtonContainer:{
+        // flexDirection: 'row',
+        marginTop:40,
+        paddingHorizontal: 20,
+        alignItems: 'flex-end'
+    },
+    settingButton: {
+        height: 40,
+        justifyContent: 'center',
+        backgroundColor:'blue',
+    }
 });
