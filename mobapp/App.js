@@ -15,8 +15,8 @@ import { MaterialIcons, EvilIcons } from "@expo/vector-icons";
 import * as Speech from "expo-speech";
 import { useInterval } from "usehooks-ts";
 import { Image } from "expo-image";
-import placeHolder from "./assets/withoutcoordinate.jpg"
-import {Asset, useAssets} from "expo-asset"
+import placeHolder from "./assets/withoutcoordinate.jpg";
+import { Asset, useAssets } from "expo-asset";
 // import { setIntervalAsync, clearIntervalAsync } from "set-interval-async";
 
 export default function App() {
@@ -43,7 +43,6 @@ export default function App() {
         wasteContainer: true,
         streetLight: true,
     });
-
 
     const onChange = (key, value) => {
         setOptionsData((prevState) => ({
@@ -171,18 +170,16 @@ export default function App() {
                         style={[
                             styles.camera,
                             {
-                                marginBottom: height - (4 / 3) * width,
+                                marginBottom: 180,
                             },
                         ]}
                         type={type}
                         ratio={"4:3"}
                         ref={cameraRef}
                     >
-                        
                         {/* <Image source={require("./assets/withoutcoordinate.jpg")} style={{width:400, height:500}} /> */}
-                        
-                        <View style={styles.topButtonContainer}>
 
+                        <View style={styles.topButtonContainer}>
                             <TouchableOpacity
                                 style={styles.settingButton}
                                 onPress={() => setSettingTrigger(true)}
@@ -196,73 +193,79 @@ export default function App() {
                         </View>
                         {/* <Button title="Settings"/> */}
                     </Camera>
-                    
+
                     <View
                         style={{
-                            flex: 1,
                             alignItems: "center",
                             justifyContent: "center",
+                            paddingHorizontal: 10,
                         }}
                     >
-                        <View style={[{
-                            borderColor:"red", 
-                            height:0, 
-                            width:328, 
-                            borderWidth:1,
-                            position: "absolute",
-                            top:-425,
-                            left:-23,
-                            
-                            // rotateY:"107.6deg"
-                            }, {transform: [{rotate:"107.6deg"}]}]} />
+                        <View
+                            style={[
+                                styles.lineProperties,
+                                {
+                                    left: -24,
+                                    borderColor: "red",
+                                    width: 338,
+                                },
+                                { transform: [{ rotate: "107.6deg" }] },
+                            ]}
+                        />
 
-                        <View style={[{
-                            borderColor:"red", 
-                            height:0, 
-                            width:328, 
-                            borderWidth:1,
-                            position: "absolute",
-                            top:-425,
-                            left:77,
-                            
-                            // rotateY:"107.6deg"
-                            }, {transform: [{rotate:"72.45deg"}]}]} />
+                        <View
+                            style={[
+                                styles.lineProperties,
+                                {
+                                    left: 80,
+                                    borderColor: "red",
+                                    width: 338,
+                                },
+                                { transform: [{ rotate: "72.45deg" }] },
+                            ]}
+                        />
 
-                        <View style={[{
-                            borderColor:"yellow", 
-                            height:0, 
-                            width:318, 
-                            borderWidth:1,
-                            position: "absolute",
-                            top:-425,
-                            left:0,
-                            
-                            // rotateY:"107.6deg"
-                            }, {transform: [{rotate:"101.07deg"}]}]} />
-                        
-                        <View style={[{
-                            borderColor:"yellow", 
-                            height:0, 
-                            width:318, 
-                            borderWidth:1,
-                            position: "absolute",
-                            top:-425,
-                            left:64,
-                            
-                            // rotateY:"107.6deg"
-                            }, {transform: [{rotate:"78.93deg"}]}]} />
- 
-                        <Text style={[styles.mediumText, { paddingBottom: 3 }]}>
-                            {capture && message()}
+                        <View
+                            style={[
+                                styles.lineProperties,
+                                {
+                                    left: 1,
+                                    borderColor: "yellow",
+                                    width: 328,
+                                },
+                                { transform: [{ rotate: "101.07deg" }] },
+                            ]}
+                        />
+
+                        <View
+                            style={[
+                                styles.lineProperties,
+                                {
+                                    left: 65,
+                                    borderColor: "yellow",
+                                    width: 328,
+                                },
+                                { transform: [{ rotate: "78.93deg" }] },
+                            ]}
+                        />
+
+                        <Text
+                            style={[
+                                styles.mediumText,
+                                { paddingBottom: 3, textAlign: "center" },
+                            ]}
+                        >
+                            {capture
+                                ? message()
+                                : "Align your camera to the walking path area"}
                         </Text>
                         <View style={styles.confirmButtonContainer}>
-                        
                             <TouchableOpacity
                                 style={styles.confirmButton}
                                 onPress={() => beginCapture()}
                                 // onPress={speak}
                             >
-                                <Text style={styles.mediumText}>
+                                <Text style={[styles.mediumText]}>
                                     Begin Capture
                                 </Text>
                             </TouchableOpacity>
@@ -463,12 +466,12 @@ const styles = StyleSheet.create({
     smallText: {
         fontSize: 15,
     },
-    lineProperties:{
-        borderColor:"red", 
-        height:0, 
-        width:328, 
-        borderWidth:1,
+    lineProperties: {
+        // borderColor: "red",
+        height: 0,
+        // width: 328,
+        borderWidth: 1,
         position: "absolute",
-        top:-340,
-    }
+        top: -342,
+    },
 });
