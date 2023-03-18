@@ -14,7 +14,9 @@ import { useState, useEffect, useRef } from "react";
 import { MaterialIcons, EvilIcons } from "@expo/vector-icons";
 import * as Speech from "expo-speech";
 import { useInterval } from "usehooks-ts";
-import { isEnabled } from "react-native/Libraries/Performance/Systrace";
+import { Image } from "expo-image";
+import placeHolder from "./assets/withoutcoordinate.jpg"
+import {Asset, useAssets} from "expo-asset"
 // import { setIntervalAsync, clearIntervalAsync } from "set-interval-async";
 
 export default function App() {
@@ -27,6 +29,7 @@ export default function App() {
     const cameraRef = useRef(null);
     const { height, width } = Dimensions.get("window");
     const [settingTrigger, setSettingTrigger] = useState(false);
+    // const [assets, error] = useAssets([require("./assets/withoutcoordinate.jpg")])
 
     const [optionsData, setOptionsData] = useState({
         danger: true,
@@ -40,6 +43,7 @@ export default function App() {
         wasteContainer: true,
         streetLight: true,
     });
+
 
     const onChange = (key, value) => {
         setOptionsData((prevState) => ({
@@ -174,7 +178,11 @@ export default function App() {
                         ratio={"4:3"}
                         ref={cameraRef}
                     >
+                        
+                        {/* <Image source={require("./assets/withoutcoordinate.jpg")} style={{width:400, height:500}} /> */}
+                        
                         <View style={styles.topButtonContainer}>
+
                             <TouchableOpacity
                                 style={styles.settingButton}
                                 onPress={() => setSettingTrigger(true)}
@@ -188,6 +196,7 @@ export default function App() {
                         </View>
                         {/* <Button title="Settings"/> */}
                     </Camera>
+                    
                     <View
                         style={{
                             flex: 1,
@@ -195,10 +204,59 @@ export default function App() {
                             justifyContent: "center",
                         }}
                     >
+                        <View style={[{
+                            borderColor:"red", 
+                            height:0, 
+                            width:328, 
+                            borderWidth:1,
+                            position: "absolute",
+                            top:-425,
+                            left:-23,
+                            
+                            // rotateY:"107.6deg"
+                            }, {transform: [{rotate:"107.6deg"}]}]} />
+
+                        <View style={[{
+                            borderColor:"red", 
+                            height:0, 
+                            width:328, 
+                            borderWidth:1,
+                            position: "absolute",
+                            top:-425,
+                            left:77,
+                            
+                            // rotateY:"107.6deg"
+                            }, {transform: [{rotate:"72.45deg"}]}]} />
+
+                        <View style={[{
+                            borderColor:"yellow", 
+                            height:0, 
+                            width:318, 
+                            borderWidth:1,
+                            position: "absolute",
+                            top:-425,
+                            left:0,
+                            
+                            // rotateY:"107.6deg"
+                            }, {transform: [{rotate:"101.07deg"}]}]} />
+                        
+                        <View style={[{
+                            borderColor:"yellow", 
+                            height:0, 
+                            width:318, 
+                            borderWidth:1,
+                            position: "absolute",
+                            top:-425,
+                            left:64,
+                            
+                            // rotateY:"107.6deg"
+                            }, {transform: [{rotate:"78.93deg"}]}]} />
+ 
                         <Text style={[styles.mediumText, { paddingBottom: 3 }]}>
                             {capture && message()}
                         </Text>
                         <View style={styles.confirmButtonContainer}>
+                        
                             <TouchableOpacity
                                 style={styles.confirmButton}
                                 onPress={() => beginCapture()}
@@ -405,4 +463,12 @@ const styles = StyleSheet.create({
     smallText: {
         fontSize: 15,
     },
+    lineProperties:{
+        borderColor:"red", 
+        height:0, 
+        width:328, 
+        borderWidth:1,
+        position: "absolute",
+        top:-340,
+    }
 });
