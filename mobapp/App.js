@@ -3,17 +3,20 @@ import {
     StyleSheet,
     Text,
     View,
-    Button,
     TouchableOpacity,
     Dimensions,
     Switch,
+    ScrollView,
+    TextInput,
 } from "react-native";
+import Slider from "@react-native-community/slider";
 import CheckBox from "expo-checkbox";
 import { Camera, CameraType } from "expo-camera";
 import { useState, useEffect, useRef } from "react";
 import { MaterialIcons, EvilIcons } from "@expo/vector-icons";
 import * as Speech from "expo-speech";
 import { useInterval } from "usehooks-ts";
+import * as MediaLibrary from "expo-media-library";
 import { Image } from "expo-image";
 import placeHolder from "./assets/withoutcoordinate.jpg";
 import { Asset, useAssets } from "expo-asset";
@@ -32,6 +35,7 @@ export default function App() {
     // const [assets, error] = useAssets([require("./assets/withoutcoordinate.jpg")])
 
     const [optionsData, setOptionsData] = useState({
+        save: false,
         danger: true,
         alert: true,
         objectName: false,
@@ -42,6 +46,7 @@ export default function App() {
         tree: true,
         wasteContainer: true,
         streetLight: true,
+        threshold: 0.7,
     });
 
     const onChange = (key, value) => {
@@ -84,6 +89,7 @@ export default function App() {
         return res;
     };
     const setupCamera = async () => {
+        const mediaLibraryStatus = await MediaLibrary.requestPermissionsAsync();
         const cameraStatus = await Camera.requestCameraPermissionsAsync();
         setHasCameraPermission(cameraStatus.status === "granted");
     };
@@ -142,6 +148,10 @@ export default function App() {
                 console.log("start test");
                 setWaiting(true);
                 const image = await cameraRef.current.takePictureAsync();
+                if (optionsData.save) {
+                    console.log(image.uri);
+                    await MediaLibrary.saveToLibraryAsync(image.uri);
+                }
                 return image;
             } catch (error) {
                 console.log(error);
@@ -170,14 +180,18 @@ export default function App() {
                         style={[
                             styles.camera,
                             {
-                                marginBottom: 180,
+                                // marginBottom: 180,
+                                maxHeight: 510,
                             },
                         ]}
                         type={type}
                         ratio={"4:3"}
                         ref={cameraRef}
                     >
-                        {/* <Image source={require("./assets/withoutcoordinate.jpg")} style={{width:400, height:500}} /> */}
+                        {/* <Image
+                            source={require("./assets/test_image.jpg")}
+                            style={{ width: 400, height: 510 }}
+                        /> */}
 
                         <View style={styles.topButtonContainer}>
                             <TouchableOpacity
@@ -199,6 +213,7 @@ export default function App() {
                             alignItems: "center",
                             justifyContent: "center",
                             paddingHorizontal: 10,
+                            paddingTop: 7,
                         }}
                     >
                         <View
@@ -259,131 +274,216 @@ export default function App() {
                                 ? message()
                                 : "Align your camera to the walking path area"}
                         </Text>
-                        <View style={styles.confirmButtonContainer}>
+                        <View style={styles.buttonContainer}>
                             <TouchableOpacity
-                                style={styles.confirmButton}
+                                style={
+                                    capture
+                                        ? [
+                                              styles.confirmButton,
+                                              {
+                                                  borderColor: "red",
+                                              },
+                                          ]
+                                        : styles.confirmButton
+                                }
                                 onPress={() => beginCapture()}
                                 // onPress={speak}
                             >
-                                <Text style={[styles.mediumText]}>
-                                    Begin Capture
+                                <Text
+                                    style={
+                                        capture
+                                            ? [
+                                                  styles.mediumText,
+                                                  { color: "red" },
+                                              ]
+                                            : styles.mediumText
+                                    }
+                                >
+                                    {capture ? "Stop Capture" : "Begin Capture"}
                                 </Text>
                             </TouchableOpacity>
                         </View>
                     </View>
                 </>
             ) : (
-                <View style={{ flex: 1 }}>
+                <ScrollView style={{ flex: 1 }}>
                     <View style={styles.settingContainer}>
-                        <Text style={styles.largeText}>General Settings</Text>
-                        <View style={styles.optionContainer}>
-                            <Switch
-                                onValueChange={() =>
-                                    onChange("danger", !optionsData.danger)
-                                }
-                                name="danger"
-                                value={optionsData.danger}
-                            />
-                            <Text style={styles.mediumText}>
-                                Danger Information
+                        <View style={styles.mainSetting}>
+                            <Text style={styles.largeText}>
+                                General Settings
                             </Text>
+                            <View style={styles.optionContainer}>
+                                <Text style={styles.mediumText}>
+                                    Save Image
+                                </Text>
+                                <Switch
+                                    onValueChange={() =>
+                                        onChange("save", !optionsData.save)
+                                    }
+                                    name="save"
+                                    value={optionsData.save}
+                                />
+                            </View>
+                            <View style={styles.optionContainer}>
+                                <Text style={styles.mediumText}>
+                                    Danger Information
+                                </Text>
+                                <Switch
+                                    onValueChange={() =>
+                                        onChange("danger", !optionsData.danger)
+                                    }
+                                    name="danger"
+                                    value={optionsData.danger}
+                                />
+                            </View>
+                            <View style={styles.optionContainer}>
+                                <Text style={styles.mediumText}>
+                                    Alert Information
+                                </Text>
+                                <Switch
+                                    onValueChange={() =>
+                                        onChange("alert", !optionsData.alert)
+                                    }
+                                    value={optionsData.alert}
+                                    name="alert"
+                                />
+                            </View>
+                            <View style={styles.optionContainer}>
+                                <Text style={styles.mediumText}>
+                                    Object Name
+                                </Text>
+                                <Switch
+                                    onValueChange={() =>
+                                        onChange(
+                                            "objectName",
+                                            !optionsData.objectName
+                                        )
+                                    }
+                                    value={optionsData.objectName}
+                                    name="objectName"
+                                />
+                            </View>
+                            <View
+                                style={[
+                                    styles.optionContainer,
+                                    {
+                                        flexDirection: "column",
+                                        paddingTop: 7,
+                                        height: 70,
+                                    },
+                                ]}
+                            >
+                                <Text style={styles.mediumText}>Threshold</Text>
+                                <Text>{optionsData.threshold}</Text>
+                                <Slider
+                                    style={styles.slider}
+                                    minimumValue={0}
+                                    maximumValue={1}
+                                    value={optionsData.threshold}
+                                    step={0.05}
+                                    onValueChange={(threshold) =>
+                                        onChange(
+                                            "threshold",
+                                            parseFloat(threshold.toPrecision(2))
+                                        )
+                                    }
+                                />
+                            </View>
                         </View>
-                        <View style={styles.optionContainer}>
-                            <Switch
-                                onValueChange={() =>
-                                    onChange("alert", !optionsData.alert)
-                                }
-                                value={optionsData.alert}
-                                name="alert"
-                            />
-                            <Text style={styles.mediumText}>
-                                Alert Information
-                            </Text>
-                        </View>
-                        <View style={styles.optionContainer}>
-                            <Switch
-                                onValueChange={() =>
-                                    onChange(
-                                        "objectName",
-                                        !optionsData.objectName
-                                    )
-                                }
-                                value={optionsData.objectName}
-                                name="objectName"
-                            />
-                            <Text style={styles.mediumText}>Object Name</Text>
-                        </View>
-                        <Text style={styles.largeText}>Object Class</Text>
-                        <View style={styles.optionContainer}>
-                            <CheckBox
-                                onValueChange={() =>
-                                    onChange("bicycle", !optionsData.bicycle)
-                                }
-                                name="bicycle"
-                                value={optionsData.bicycle}
-                            />
-                            <Text style={styles.mediumText}>Bicycle</Text>
-                        </View>
-                        <View style={styles.optionContainer}>
-                            <CheckBox
-                                onValueChange={() =>
-                                    onChange("car", !optionsData.car)
-                                }
-                                value={optionsData.car}
-                                name="car"
-                            />
-                            <Text style={styles.mediumText}>Car</Text>
-                        </View>
-                        <View style={styles.optionContainer}>
-                            <CheckBox
-                                onValueChange={() =>
-                                    onChange(
-                                        "fireHydrant",
-                                        !optionsData.fireHydrant
-                                    )
-                                }
-                                value={optionsData.fireHydrant}
-                                name="fireHydrant"
-                            />
-                            <Text style={styles.mediumText}>Fire hydrant</Text>
-                        </View>
-                        <View style={styles.optionContainer}>
-                            <CheckBox
-                                onValueChange={() =>
-                                    onChange(
-                                        "furniture",
-                                        !optionsData.furniture
-                                    )
-                                }
-                                value={optionsData.furniture}
-                                name="furniture"
-                            />
-                            <Text style={styles.mediumText}>Furniture</Text>
-                        </View>
-                        <View style={styles.optionContainer}>
-                            <CheckBox
-                                onValueChange={() =>
-                                    onChange("tree", !optionsData.tree)
-                                }
-                                value={optionsData.tree}
-                                name="tree"
-                            />
-                            <Text style={styles.mediumText}>Tree</Text>
-                        </View>
-                        <View style={styles.optionContainer}>
-                            <CheckBox
-                                onValueChange={() =>
-                                    onChange(
-                                        "wasteContainer",
-                                        !optionsData.wasteContainer
-                                    )
-                                }
-                                value={optionsData.wasteContainer}
-                                name="wasteContainer"
-                            />
-                            <Text style={styles.mediumText}>
-                                Waste Container
-                            </Text>
+
+                        <View style={styles.mainSetting}>
+                            <Text style={styles.largeText}>Object Class</Text>
+                            <View style={styles.optionContainer}>
+                                <Text style={styles.mediumText}>Bicycle</Text>
+                                <CheckBox
+                                    onValueChange={() =>
+                                        onChange(
+                                            "bicycle",
+                                            !optionsData.bicycle
+                                        )
+                                    }
+                                    name="bicycle"
+                                    value={optionsData.bicycle}
+                                />
+                            </View>
+                            <View style={styles.optionContainer}>
+                                <Text style={styles.mediumText}>Car</Text>
+                                <CheckBox
+                                    onValueChange={() =>
+                                        onChange("car", !optionsData.car)
+                                    }
+                                    value={optionsData.car}
+                                    name="car"
+                                />
+                            </View>
+                            <View style={styles.optionContainer}>
+                                <Text style={styles.mediumText}>
+                                    Fire hydrant
+                                </Text>
+                                <CheckBox
+                                    onValueChange={() =>
+                                        onChange(
+                                            "fireHydrant",
+                                            !optionsData.fireHydrant
+                                        )
+                                    }
+                                    value={optionsData.fireHydrant}
+                                    name="fireHydrant"
+                                />
+                            </View>
+                            <View style={styles.optionContainer}>
+                                <Text style={styles.mediumText}>Furniture</Text>
+                                <CheckBox
+                                    onValueChange={() =>
+                                        onChange(
+                                            "furniture",
+                                            !optionsData.furniture
+                                        )
+                                    }
+                                    value={optionsData.furniture}
+                                    name="furniture"
+                                />
+                            </View>
+                            <View style={styles.optionContainer}>
+                                <Text style={styles.mediumText}>Tree</Text>
+                                <CheckBox
+                                    onValueChange={() =>
+                                        onChange("tree", !optionsData.tree)
+                                    }
+                                    value={optionsData.tree}
+                                    name="tree"
+                                />
+                            </View>
+                            <View style={styles.optionContainer}>
+                                <Text style={styles.mediumText}>
+                                    Waste Container
+                                </Text>
+                                <CheckBox
+                                    onValueChange={() =>
+                                        onChange(
+                                            "wasteContainer",
+                                            !optionsData.wasteContainer
+                                        )
+                                    }
+                                    value={optionsData.wasteContainer}
+                                    name="wasteContainer"
+                                />
+                            </View>
+                            <View style={styles.optionContainer}>
+                                <Text style={styles.mediumText}>
+                                    Street Light
+                                </Text>
+                                <CheckBox
+                                    onValueChange={() =>
+                                        onChange(
+                                            "streetLight",
+                                            !optionsData.streetLight
+                                        )
+                                    }
+                                    value={optionsData.streetLight}
+                                    name="streetLight"
+                                />
+                            </View>
                         </View>
                     </View>
                     <View style={styles.confirmButtonContainer}>
@@ -394,7 +494,7 @@ export default function App() {
                             <Text style={styles.mediumText}>Confirm</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
+                </ScrollView>
             )}
         </View>
     );
@@ -410,12 +510,13 @@ const styles = StyleSheet.create({
         flex: 5,
     },
     buttonContainer: {
+        paddingTop: 10,
         alignItems: "center",
         justifyContent: "center",
     },
     topButtonContainer: {
         // flexDirection: 'row',
-        marginTop: 40,
+        marginTop: 20,
         paddingHorizontal: 20,
         alignItems: "flex-end",
     },
@@ -426,7 +527,7 @@ const styles = StyleSheet.create({
     },
     settingContainer: {
         marginTop: 40,
-        paddingHorizontal: 20,
+        paddingHorizontal: 10,
         flexDirection: "column",
         flex: 1,
     },
@@ -453,18 +554,19 @@ const styles = StyleSheet.create({
         height: 50,
         // backgroundColor: "blue",
         borderTopWidth: 1,
-        marginBottom: 12,
+        marginBottom: 10,
+        borderColor: "#8F8F8F",
     },
     largeText: {
-        fontSize: 30,
+        fontSize: 22,
         fontWeight: "bold",
         marginBottom: 5,
     },
     mediumText: {
-        fontSize: 20,
+        fontSize: 17,
     },
     smallText: {
-        fontSize: 15,
+        fontSize: 16,
     },
     lineProperties: {
         // borderColor: "red",
@@ -472,6 +574,17 @@ const styles = StyleSheet.create({
         // width: 328,
         borderWidth: 1,
         position: "absolute",
-        top: -342,
+        top: -162,
+    },
+    mainSetting: {
+        backgroundColor: "#D9D9D9",
+        borderRadius: 20,
+        paddingHorizontal: 15,
+        paddingTop: 9,
+        marginBottom: 10,
+    },
+    slider: {
+        width: 330,
+        height: 20,
     },
 });
