@@ -75,7 +75,7 @@ export default function App() {
         form.append("file", photo);
 
         console.log(form);
-        await fetch("http://192.168.0.21:8000/uploadfile", {
+        await fetch("http://172.22.228.93:8000/uploadfile", {
             method: "POST",
             body: form,
             headers: {
